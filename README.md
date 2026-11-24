@@ -2,7 +2,7 @@
 
 一个 Chrome / Edge 浏览器插件：把英文小说（比如从 AO3 下载的同人）拖进去，转换成 EPUB / HTML / TXT / PDF，并可以用 DeepSeek 翻译成**纯中文**或**中英对照**。
 
-![界面预览](界面预览.png)
+![界面预览](sample.png)
 
 - 支持读入：EPUB、HTML（能识别 AO3 下载格式）、TXT、文字版 PDF
 - 支持导出：EPUB 3、单文件 HTML、TXT、PDF（打印另存为）
@@ -15,13 +15,14 @@
 
 ## 安装
 
-1. 在本页右侧点 **Releases**，下载最新版的 `译读-x.x.zip` 并解压。
+1. 在本页右侧点 **Releases**，下载最新版的 `EasyRead-x.x.zip` 并解压。
    （或者点绿色的 **Code → Download ZIP**。）
+   所有文件名都是英文，Windows 自带解压也不会乱码。
 2. 浏览器地址栏打开 `chrome://extensions`（Edge 打开 `edge://extensions`）。
 3. 打开“开发者模式” → 点“加载已解压的扩展程序” → 选择解压出来的 **`extension`** 文件夹。
 4. 点工具栏的拼图图标，把“译读”固定到工具栏。
 
-解压后也可以双击 `安装说明.html`，里面有图文步骤和“复制文件夹路径”按钮。
+解压后也可以双击 `INSTALL.html`，里面有图文步骤和“复制文件夹路径”按钮。
 
 ## 填写你自己的 DeepSeek API Key
 
@@ -31,7 +32,7 @@
 
 Key 只保存在你自己电脑的浏览器里，插件只会把它发给 `api.deepseek.com`。**不要把 Key 发给别人，也不要贴到 Issue 或截图里。** 如果不小心泄露了，到 DeepSeek 后台把它删掉再新建一个就行。
 
-更多说明见 [DeepSeek快速开始.md](DeepSeek快速开始.md)。
+更多说明见 [DEEPSEEK.md](DEEPSEEK.md)。
 
 ## 使用
 
@@ -39,7 +40,7 @@ Key 只保存在你自己电脑的浏览器里，插件只会把它发给 `api.d
 2. 选输出格式和翻译方式（不翻译 / 只要中文 / 中英对照）。
 3. 点“开始”，完成后会自动下载。
 
-完整说明和常见问题见 [使用说明.md](使用说明.md)。
+完整说明和常见问题见 [USAGE.md](USAGE.md)。
 
 ## 注意
 
