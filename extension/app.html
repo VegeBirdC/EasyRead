@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>译读 · 电子书转换与翻译</title>
+<link rel="icon" href="icons/icon32.png">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<main>
+  <header>
+    <div>
+      <span class="badge">EPUB · HTML · PDF · TXT　|　DeepSeek 翻译</span>
+      <h1>译读</h1>
+      <p class="sub">拖入小说 → 选格式 → 选是否翻译 → 开始。译文会存在本地，中途关掉下次接着译。</p>
+    </div>
+    <button id="openSettings" class="ghost" title="设置">⚙ 设置</button>
+  </header>
+
+  <div id="keyWarn" class="warn" hidden>还没有填写 DeepSeek API Key，翻译前需要先 <a href="#" id="keyWarnLink">打开设置</a> 填一下（只转换格式不需要）。</div>
+
+  <section id="drop" class="drop" tabindex="0">
+    <div class="drop-inner">
+      <div class="drop-icon">📚</div>
+      <b>把小说拖到这里</b>
+      <span>支持 EPUB / HTML / PDF / TXT，可一次拖多本</span>
+      <button id="pick" class="ghost small">或者点这里选择文件</button>
+      <input id="fileInput" type="file" multiple accept=".epub,.html,.htm,.xhtml,.txt,.md,.pdf" hidden>
+    </div>
+  </section>
+
+  <section id="list" class="card" hidden>
+    <div class="card-head"><b>书单</b><button id="clearList" class="link">清空</button></div>
+    <div id="rows"></div>
+  </section>
+
+  <section class="card">
+    <div class="opt">
+      <div class="label">输出格式</div>
+      <div class="chips" id="fmtChips">
+        <button data-v="epub">EPUB<small>推荐，手机/阅读器</small></button>
+        <button data-v="html">HTML<small>浏览器直接看</small></button>
+        <button data-v="txt">TXT<small>最通用</small></button>
+        <button data-v="pdf">PDF<small>打印另存为</small></button>
+      </div>
+    </div>
+    <div class="opt">
+      <div class="label">翻译</div>
+      <div class="chips" id="modeChips">
+        <button data-v="none">不翻译<small>只转换格式</small></button>
+        <button data-v="zh">只要中文<small>纯中文阅读</small></button>
+        <button data-v="bi">中英对照<small>原文在上，译文在下</small></button>
+      </div>
+    </div>
+    <div id="transOpts">
+      <div class="opt">
+        <div class="label">译文风格</div>
+        <div class="chips compact" id="styleChips">
+          <button data-v="natural">自然流畅</button>
+          <button data-v="faithful">贴近原文</button>
+        </div>
+      </div>
+      <div class="opt">
+        <div class="label">人名统一</div>
+        <label class="check"><input type="checkbox" id="autoGlossary"> 翻译前先自动整理人名/地名表（推荐，保证全书译名一致，额外花费很少）</label>
+      </div>
+      <details class="opt gloss">
+        <summary>自定义人名 / 术语对照（可选）</summary>
+        <textarea id="glossary" rows="5" placeholder="一行一个，例如：&#10;Draco Malfoy = 德拉科·马尔福&#10;Steve = 史蒂夫&#10;Bucky = 巴基"></textarea>
+        <p class="hint">你填写的优先于自动整理的结果。修改后再译，会按新译名重新翻译。</p>
+      </details>
+    </div>
+    <div class="actions">
+      <span id="estimate" class="hint"></span>
+      <button id="start" class="primary" disabled>开始</button>
+    </div>
+  </section>
+
+  <section id="logBox" class="card log" hidden><div id="log"></div></section>
+
+  <footer>
+    <span id="cacheInfo"></span> · <button id="clearCache" class="link">清空译文缓存</button>
+    · <a href="https://platform.deepseek.com/usage" target="_blank">查看 DeepSeek 用量</a>
+  </footer>
+</main>
+
+<!-- 设置抽屉 -->
+<div id="mask" hidden></div>
+<aside id="settings" aria-hidden="true">
+  <div class="card-head"><b>设置</b><button id="closeSettings" class="link">关闭 ✕</button></div>
+  <label class="field">DeepSeek API Key
+    <div class="row">
+      <input id="apiKey" type="password" placeholder="sk-..." autocomplete="off" spellcheck="false">
+      <button id="toggleKey" class="ghost small" title="显示/隐藏">👁</button>
+    </div>
+    <span class="hint">只保存在这台电脑的浏览器里。在 <a href="https://platform.deepseek.com/api_keys" target="_blank">platform.deepseek.com/api_keys</a> 创建。</span>
+  </label>
+  <div class="row"><button id="testConn" class="ghost">检测连接</button><span id="testResult" class="hint"></span></div>
+
+  <label class="field">模型
+    <select id="model"></select>
+    <span class="hint"><b>deepseek-flash</b>：便宜快速，日常够用；<b>deepseek-v4-pro</b>：文笔更好，价格约 3～4 倍。点“检测连接”会自动刷新可用模型。</span>
+  </label>
+
+  <details class="adv">
+    <summary>高级</summary>
+    <label class="field">同时翻译的请求数<input id="concurrency" type="number" min="1" max="16"><span class="hint">默认 6。遇到“服务繁忙”可以调小。</span></label>
+    <label class="field">每批字符数<input id="batchChars" type="number" min="600" max="8000" step="100"><span class="hint">默认 2400。越大越省提示词费用，但出错时重试成本更高。</span></label>
+    <label class="field">Temperature<input id="temperature" type="number" min="0" max="2" step="0.1"><span class="hint">DeepSeek 建议翻译用 1.3。</span></label>
+    <label class="field">接口地址（Base URL）<input id="baseUrl" type="text" spellcheck="false"><span class="hint">默认 https://api.deepseek.com。也可填其他 OpenAI 兼容接口（首次使用会请求访问权限）。</span></label>
+  </details>
+  <button id="saveSettings" class="primary wide">保存设置</button>
+</aside>
+
+<script src="lib/jszip.min.js"></script>
+<script src="lib/pdf.min.js"></script>
+<script type="module" src="app.js"></script>
+</body>
+</html>
